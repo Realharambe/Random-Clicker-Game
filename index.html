@@ -129,9 +129,9 @@
     let score = 0;
     let clickMultiplier = 1;
     let upgrades = [
-      { name: "Double Clicks", cost: 10, multiplier: 2 },
-      { name: "Triple Clicks", cost: 50, multiplier: 3 },
-      { name: "Quad Clicks", cost: 100, multiplier: 4 }
+      { name: "Double Clicks", baseCost: 10, multiplier: 2, quantity: 0 },
+      { name: "Triple Clicks", baseCost: 50, multiplier: 3, quantity: 0 },
+      { name: "Quad Clicks", baseCost: 100, multiplier: 4, quantity: 0 }
     ];
 
     function increaseScore() {
@@ -141,13 +141,15 @@
 
     function buyUpgrade(index) {
       const upgrade = upgrades[index];
-      if (score >= upgrade.cost) {
-        score -= upgrade.cost;
+      const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
+
+      if (score >= totalCost) {
+        score -= totalCost;
         clickMultiplier *= upgrade.multiplier;
-        upgrade.cost *= 2;
+        upgrade.quantity++;
        
         document.getElementById("score").innerText = score;
-        document.getElementById(`upgrade-${index}`).innerText = `${upgrade.name} (Cost: ${upgrade.cost} clicks, Multiplier: ${upgrade.multiplier})`;
+        document.getElementById(`upgrade-${index}`).innerText = `${upgrade.name} (Cost: ${totalCost} clicks, Quantity: ${upgrade.quantity})`;
       }
     }
 
@@ -162,7 +164,8 @@
         const upgradeElement = document.createElement("li");
         upgradeElement.classList.add("upgrade");
         upgradeElement.id = `upgrade-${index}`;
-        upgradeElement.innerText = `${upgrade.name} (Cost: ${upgrade.cost} clicks, Multiplier: ${upgrade.multiplier})`;
+        const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
+        upgradeElement.innerText = `${upgrade.name} (Cost: ${totalCost} clicks, Quantity: ${upgrade.quantity})`;
 
         const upgradeButton = document.createElement("button");
         upgradeButton.innerText = "Buy";
@@ -190,3 +193,4 @@
   </div>
 </body>
 </html>
+
