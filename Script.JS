@@ -1,95 +1,76 @@
-// Get the elements from the DOM
-const clickButton = document.getElementById("click-button");
-const scoreElement = document.getElementById("score");
-const upgrade1 = document.getElementById("upgrade-1");
-const upgrade2 = document.getElementById("upgrade-2");
-const upgrade3 = document.getElementById("upgrade-3");
-const purchasedUpgrades = document.getElementById("purchased-upgrades");
-
-// Initialize the score and upgrades
 let score = 0;
 let clickMultiplier = 1;
-let upgrade1Cost = 10;
-let upgrade2Cost = 25;
-let upgrade3Cost = 50;
-let purchasedUpgradesList = [];
+let upgrades = [
+  { name: "Double Clicks", baseCost: 10, multiplier: 2, quantity: 0 },
+  { name: "Triple Clicks", baseCost: 50, multiplier: 3, quantity: 0 },
+  { name: "Quad Clicks", baseCost: 100, multiplier: 4, quantity: 0 }
+];
 
-// Function to handle button clicks
-function handleClick() {
-  // Increase the score by the click multiplier
+function increaseScore() {
   score += clickMultiplier;
-
-  // Update the score display
-  scoreElement.textContent = score.toString();
+  document.getElementById("score").innerText = score;
 }
 
-// Function to handle upgrade purchases
-function handleUpgradePurchase(event) {
-  const clickedUpgrade = event.target;
+function buyUpgrade(index) {
+  const upgrade = upgrades[index];
+  const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
 
-  if (clickedUpgrade.id === "upgrade-1") {
-    if (score >= upgrade1Cost) {
-      // Subtract the upgrade cost from the score
-      score -= upgrade1Cost;
+  if (score >= totalCost) {
+    score -= totalCost;
+    clickMultiplier *= upgrade.multiplier;
+    upgrade.quantity++;
 
-      // Increase the click multiplier for each click
-      clickMultiplier += 1;
+    // Update the upgrade element with new values
+    const upgradeElement = document.getElementById(`upgrade-${index}`);
+    const upgradeButton = upgradeElement.querySelector("button");
+    const upgradeQuantity = upgradeElement.querySelector(".quantity");
+    const upgradeCost = upgradeElement.querySelector(".cost");
 
-      // Increase the upgrade cost for the next purchase
-      upgrade1Cost *= 2;
+    upgradeQuantity.textContent = `Quantity: ${upgrade.quantity}`;
+    upgradeCost.textContent = `Cost: ${totalCost} clicks`;
 
-      // Update the score display, click multiplier, and upgrade cost
-      scoreElement.textContent = score.toString();
-      clickedUpgrade.textContent = `Upgrade 1 (Cost: ${upgrade1Cost} clicks)`;
-
-      // Add the purchased upgrade to the list
-      purchasedUpgradesList.push("Upgrade 1 (x2 multiplier)");
-      purchasedUpgrades.innerHTML = purchasedUpgradesList.map(upgrade => `<li>${upgrade}</li>`).join("");
-    }
-  } else if (clickedUpgrade.id === "upgrade-2") {
-    if (score >= upgrade2Cost) {
-      // Subtract the upgrade cost from the score
-      score -= upgrade2Cost;
-
-      // Increase the click multiplier for each click
-      clickMultiplier += 1;
-
-      // Increase the upgrade cost for the next purchase
-      upgrade2Cost *= 2;
-
-      // Update the score display, click multiplier, and upgrade cost
-      scoreElement.textContent = score.toString();
-      clickedUpgrade.textContent = `Upgrade 2 (Cost: ${upgrade2Cost} clicks)`;
-
-      // Add the purchased upgrade to the list
-      purchasedUpgradesList.push("Upgrade 2 (x2 multiplier)");
-      purchasedUpgrades.innerHTML = purchasedUpgradesList.map(upgrade => `<li>${upgrade}</li>`).join("");
-    }
-  } else if (clickedUpgrade.id === "upgrade-3") {
-    if (score >= upgrade3Cost) {
-      // Subtract the upgrade cost from the score
-      score -= upgrade3Cost;
-
-      // Increase the click multiplier for each click
-      clickMultiplier += 1;
-
-      // Increase the upgrade cost for the next purchase
-      upgrade3Cost *= 2;
-
-      // Update the score display, click multiplier, and upgrade cost
-      scoreElement.textContent = score.toString();
-      clickedUpgrade.textContent = `Upgrade 3 (Cost: ${upgrade3Cost} clicks)`;
-
-      // Add the purchased upgrade to the list
-      purchasedUpgradesList.push("Upgrade 3 (x2 multiplier)");
-      purchasedUpgrades.innerHTML = purchasedUpgradesList.map(upgrade => `<li>${upgrade}</li>`).join("");
-    }
+    document.getElementById("score").innerText = score;
+    upgradeButton.disabled = score < totalCost;
   }
 }
 
-// Attach the event listeners to the upgrades
-upgrade1.addEventListener("click", handleUpgradePurchase);
-upgrade2.addEventListener("click", handleUpgradePurchase);
-upgrade3.addEventListener("click", handleUpgradePurchase);
+function toggleDarkMode() {
+  const body = document.body;
+  body.classList.toggle("dark-mode");
+}
 
-// Attach the
+function initializeUpgrades() {
+  const upgradesContainer = document.getElementById("upgrades");
+  upgrades.forEach((upgrade, index) => {
+    const upgradeElement = document.createElement("li");
+    upgradeElement.classList.add("upgrade");
+    upgradeElement.id = `upgrade-${index}`;
+
+    const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
+    const upgradeQuantity = document.createElement("span");
+    upgradeQuantity.classList.add("quantity");
+    upgradeQuantity.textContent = `Quantity: ${upgrade.quantity}`;
+
+    const upgradeCost = document.createElement("span");
+    upgradeCost.classList.add("cost");
+    upgradeCost.textContent = `Cost: ${totalCost} clicks`;
+
+    const upgradeButton = document.createElement("button");
+    upgradeButton.innerText = "Buy";
+    upgradeButton.addEventListener("click", () => {
+      buyUpgrade(index);
+    });
+
+    upgradeElement.innerText = `${upgrade.name} `;
+    upgradeElement.appendChild(upgradeQuantity);
+    upgradeElement.appendChild(document.createElement("br"));
+    upgradeElement.appendChild(upgradeCost);
+    upgradeElement.appendChild(document.createElement("br"));
+    upgradeElement.appendChild(upgradeButton);
+    upgradesContainer.appendChild(upgradeElement);
+  });
+}
+
+window.onload = function() {
+  initializeUpgrades();
+};
