@@ -134,20 +134,39 @@
       { name: "Quad Clicks", baseCost: 100, multiplier: 4, quantity: 0 }
     ];
 
+    let autoclickerInterval;
+
     function increaseScore() {
       score += clickMultiplier;
+      document.getElementById("score").innerText = score
+      // Save the score to local storage
+      saveData();
+
+      // Update the score display
       document.getElementById("score").innerText = score;
+    }
+
+    function startAutoclicker() {
+      autoclickerInterval = setInterval(() => {
+        document.getElementById("click-button").click();
+      }, 1000); // Autoclick once per second
+    }
+
+    function stopAutoclicker() {
+      clearInterval(autoclickerInterval);
     }
 
     function buyUpgrade(index) {
       const upgrade = upgrades[index];
-      const totalCost = upgrade.baseCost *
-      Math.pow(upgrade.multiplier, upgrade.quantity);
+      const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
 
       if (score >= totalCost) {
         score -= totalCost;
         clickMultiplier *= upgrade.multiplier;
         upgrade.quantity++;
+
+        // Save the upgrades data to local storage
+        saveData();
 
         // Update the upgrade element with new values
         const upgradeElement = document.getElementById(`upgrade-${index}`);
@@ -200,8 +219,36 @@
       });
     }
 
+    function saveData() {
+      const data = {
+        score: score,
+        upgrades: upgrades
+      };
+
+      localStorage.setItem("clickerGameData", JSON.stringify(data));
+    }
+
+    function loadData() {
+      const data = localStorage.getItem("clickerGameData");
+      if (data) {
+        const parsedData = JSON.parse(data);
+        score = parsedData.score;
+        upgrades = parsedData.upgrades;
+      }
+    }
+
     window.onload = function() {
-      initializeUpgrades();
+      loadData(); // Load saved data
+      initializeUpgrades(); // Initialize upgrades UI
+
+      // Update the score display
+      document.getElementById("score").innerText = score;
+
+      // Check if the purchased upgrade is the autoclicker
+      const autoclickerUpgrade = upgrades.find(upgrade => upgrade.autoclick && upgrade.quantity > 0);
+      if (autoclickerUpgrade) {
+        startAutoclicker();
+      }
     };
   </script>
 </head>
