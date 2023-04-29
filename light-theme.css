@@ -1,0 +1,16 @@
+/* Light mode specific styles */
+body {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  #click-button {
+    background-color: #444;
+    color: #fff;
+  }
+  
+  .upgrade {
+    background-color: #333;
+    color: #fff;
+  }
+  

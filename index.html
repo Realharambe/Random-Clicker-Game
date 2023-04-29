@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clicker Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Base styles */
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+
+    p {
+      margin: 1rem 0;
+      font-size: 1.25rem;
+    }
+
+    button {
+      font-size: 1.25rem;
+      padding: 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #7dbbfc;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5c8dd3;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Dark mode styles */
+    body.dark-mode {
+      color: #f7f7f7;
+      background-color: #333;
+    }
+
+    button.dark-mode {
+      background-color: #5c8dd3;
+    }
+
+    button.dark-mode:hover {
+      background-color: #7dbbfc;
+    }
+
+    /* Upgrade styles */
+    .upgrade {
+      margin-right: 1rem;
+    }
+
+    .upgrade.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .upgrade.dark-mode {
+      background-color: #1f3a66;
+    }
+
+    .upgrade.dark-mode:hover {
+      background-color: #3f679e;
+    }
+
+    .upgrade.disabled.dark-mode {
+      opacity: 0.5;
+    }
+
+    /* Layout styles */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    #click-button {
+      display: block;
+      margin: 0 auto;
+    }
+
+    #upgrades {
+      margin-top: 2rem;
+    }
+
+    /* Media queries */
+    @media screen and (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 0.5rem;
+      }
+
+      li {
+        font-size: 1rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+    }
+  </style>
+  <script>
+    let score = 0;
+    let clickMultiplier = 1;
+    let upgrades = [
+      { name: "Double Clicks", cost: 10, multiplier: 2 },
+      { name: "Triple Clicks", cost: 50, multiplier: 3 },
+      { name: "Quad Clicks", cost: 100, multiplier: 4 }
+    ];
+
+    function increaseScore() {
+      score += clickMultiplier;
+      document.getElementById("score").innerText = score;
+    }
+
+    function buyUpgrade(index) {
+      const upgrade = upgrades[index];
+      if (score >= upgrade.cost) {
+        score -= upgrade.cost;
+        clickMultiplier *= upgrade.multiplier;
+        upgrade.cost *= 2;
+       
+        document.getElementById("score").innerText = score;
+        document.getElementById(`upgrade-${index}`).innerText = `${upgrade.name} (Cost: ${upgrade.cost} clicks, Multiplier: ${upgrade.multiplier})`;
+      }
+    }
+
+    function toggleDarkMode() {
+      const body = document.body;
+      body.classList.toggle("dark-mode");
+    }
+
+    function initializeUpgrades() {
+      const upgradesContainer = document.getElementById("upgrades");
+      upgrades.forEach((upgrade, index) => {
+        const upgradeElement = document.createElement("li");
+        upgradeElement.classList.add("upgrade");
+        upgradeElement.id = `upgrade-${index}`;
+        upgradeElement.innerText = `${upgrade.name} (Cost: ${upgrade.cost} clicks, Multiplier: ${upgrade.multiplier})`;
+
+        const upgradeButton = document.createElement("button");
+        upgradeButton.innerText = "Buy";
+        upgradeButton.addEventListener("click", () => {
+          buyUpgrade(index);
+        });
+
+        upgradeElement.appendChild(upgradeButton);
+        upgradesContainer.appendChild(upgradeElement);
+      });
+    }
+
+    window.onload = function() {
+      initializeUpgrades();
+    };
+  </script>
+</head>
+<body class="dark-mode">
+  <div class="container">
+    <h1>Clicker Game</h1>
+    <p>Score: <span id="score">0</span></p>
+    <button id="click-button" onclick="increaseScore()">Click Me</button>
+    <ul id="upgrades"></ul>
+    <button id="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  </div>
+</body>
+</html>

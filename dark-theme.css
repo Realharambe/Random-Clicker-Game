@@ -1,0 +1,16 @@
+/* Dark mode specific styles */
+body {
+    background-color: #222;
+    color: #fff;
+  }
+  
+  #click-button {
+    background-color: #666;
+    color: #fff;
+  }
+  
+  .upgrade {
+    background-color: #555;
+    color: #fff;
+  }
+  
