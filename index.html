@@ -138,10 +138,11 @@
 
     function increaseScore() {
       score += clickMultiplier;
-      document.getElementById("score").innerText = score
+      document.getElementById("score").innerText = score;
       // Save the score to local storage
       saveData();
 
+      //
       // Update the score display
       document.getElementById("score").innerText = score;
     }
@@ -237,6 +238,17 @@
       }
     }
 
+    function resetData() {
+      score = 0;
+      clickMultiplier = 1;
+      upgrades.forEach(upgrade => {
+        upgrade.quantity = 0;
+      });
+
+      saveData();
+      location.reload();
+    }
+
     window.onload = function() {
       loadData(); // Load saved data
       initializeUpgrades(); // Initialize upgrades UI
@@ -259,6 +271,7 @@
     <button id="click-button" onclick="increaseScore()">Click Me</button>
     <ul id="upgrades"></ul>
     <button id="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <button id="reset-button" onclick="resetData()">Reset</button>
   </div>
 </body>
 </html>
