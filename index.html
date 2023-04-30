@@ -7,35 +7,36 @@
     /* Base styles */
     body {
       font-family: Arial, sans-serif;
-      color: #333;
-      background-color: #f7f7f7;
+      color: #fff;
+      background-color: #222;
       margin: 0;
       padding: 0;
     }
 
     h1 {
       margin-top: 0;
-      font-size: 2.5rem;
+      font-size: 3rem;
       text-align: center;
     }
 
     p {
       margin: 1rem 0;
-      font-size: 1.25rem;
+      font-size: 1.5rem;
     }
 
     button {
-      font-size: 1.25rem;
-      padding: 1rem;
+      font-size: 1.5rem;
+      padding: 1rem 2rem;
       border: none;
       border-radius: 5px;
-      background-color: #7dbbfc;
+      background-color: #ff6f00;
       color: #fff;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
-      background-color: #5c8dd3;
+      background-color: #ff9d3f;
     }
 
     ul {
@@ -45,22 +46,21 @@
     }
 
     li {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     /* Dark mode styles */
     body.dark-mode {
-      color: #f7f7f7;
       background-color: #333;
     }
 
     button.dark-mode {
-      background-color: #5c8dd3;
+      background-color: #ff6f00;
     }
 
     button.dark-mode:hover {
-      background-color: #7dbbfc;
+      background-color: #ff9d3f;
     }
 
     /* Upgrade styles */
@@ -74,11 +74,11 @@
     }
 
     .upgrade.dark-mode {
-      background-color: #1f3a66;
+      background-color: #1f1f1f;
     }
 
     .upgrade.dark-mode:hover {
-      background-color: #3f679e;
+      background-color: #444;
     }
 
     .upgrade.disabled.dark-mode {
@@ -90,41 +90,29 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 2rem;
+      text-align: center;
     }
 
     #click-button {
       display: block;
-      margin: 0 auto;
+      margin: 2rem auto;
     }
 
     #upgrades {
       margin-top: 2rem;
     }
-
-    /* Media queries */
-    @media screen and (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-
-      p {
-        font-size: 1rem;
-      }
-
-      button {
-        font-size: 1rem;
-        padding: 0.5rem;
-      }
-
-      li {
-        font-size: 1rem;
-      }
-
-      .container {
-        padding: 1rem;
-      }
-    }
   </style>
+</head>
+<body class="dark-mode">
+  <div class="container">
+    <h1>Clicker Game</h1>
+    <p>Score: <span id="score">0</span></p>
+    <button id="click-button">Click Me</button>
+    <ul id="upgrades"></ul>
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+    <button id="reset-button">Reset</button>
+  </div>
+
   <script>
     let score = 0;
     let clickMultiplier = 1;
@@ -134,144 +122,127 @@
       { name: "Quad Clicks", baseCost: 100, multiplier: 4, quantity: 0 }
     ];
 
-    let autoclickerInterval;
-
     function increaseScore() {
       score += clickMultiplier;
       document.getElementById("score").innerText = score;
-      // Save the score to local storage
-      saveData();
-
-      //
-      // Update the score display
-      document.getElementById("score").innerText = score;
-    }
-
-    function startAutoclicker() {
-      autoclickerInterval = setInterval(() => {
-        document.getElementById("click-button").click();
-      }, 1000); // Autoclick once per second
-    }
-
-    function stopAutoclicker() {
-      clearInterval(autoclickerInterval);
+      saveGame();
     }
 
     function buyUpgrade(index) {
       const upgrade = upgrades[index];
+      const totalCost = upgrade.baseCost * Math.pow
+      (upgrade.multiplier, upgrade.quantity);  if (score >= totalCost) {
+    score -= totalCost;
+    clickMultiplier *= upgrade.multiplier;
+    upgrade.quantity++;
+
+    const upgradeElement = document.getElementById(`upgrade-${index}`);
+    const upgradeQuantity = upgradeElement.querySelector(".quantity");
+    const upgradeCost = upgradeElement.querySelector(".cost");
+
+    upgradeQuantity.textContent = `Quantity: ${upgrade.quantity}`;
+    upgradeCost.textContent = `Cost: ${totalCost} clicks`;
+
+    document.getElementById("score").innerText = score;
+
+    saveGame();
+  }
+}
+
+function toggleDarkMode() {
+  const body = document.body;
+  body.classList.toggle("dark-mode");
+  saveGame();
+}
+
+function initializeUpgrades() {
+  const upgradesContainer = document.getElementById("upgrades");
+  upgrades.forEach((upgrade, index) => {
+    const upgradeElement = document.createElement("li");
+    upgradeElement.classList.add("upgrade");
+    upgradeElement.id = `upgrade-${index}`;
+
+    const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
+    const upgradeQuantity = document.createElement("span");
+    upgradeQuantity.classList.add("quantity");
+    upgradeQuantity.textContent = `Quantity: ${upgrade.quantity}`;
+
+    const upgradeCost = document.createElement("span");
+    upgradeCost.classList.add("cost");
+    upgradeCost.textContent = `Cost: ${totalCost} clicks`;
+
+    const upgradeButton = document.createElement("button");
+    upgradeButton.innerText = "Buy";
+    upgradeButton.addEventListener("click", () => {
+      buyUpgrade(index);
+    });
+
+    upgradeElement.innerText = `${upgrade.name} `;
+    upgradeElement.appendChild(upgradeQuantity);
+    upgradeElement.appendChild(document.createElement("br"));
+    upgradeElement.appendChild(upgradeCost);
+    upgradeElement.appendChild(document.createElement("br"));
+    upgradeElement.appendChild(upgradeButton);
+    upgradesContainer.appendChild(upgradeElement);
+  });
+}
+
+function resetData() {
+  score = 0;
+  clickMultiplier = 1;
+  upgrades.forEach(upgrade => {
+    upgrade.quantity = 0;
+  });
+
+  document.getElementById("score").innerText = score;
+  const upgradeElements = document.querySelectorAll(".upgrade");
+  upgradeElements.forEach(element => {
+    const quantityElement = element.querySelector(".quantity");
+    const costElement = element.querySelector(".cost");
+    quantityElement.textContent = "Quantity: 0";
+    costElement.textContent = `Cost: ${element.dataset.baseCost} clicks`;
+  });
+
+  saveGame();
+}
+
+function saveGame() {
+  const gameData = {
+    score,
+    clickMultiplier,
+    upgrades
+  };
+  localStorage.setItem("clickerGame", JSON.stringify(gameData));
+}
+
+function loadGame() {
+  const savedData = localStorage.getItem("clickerGame");
+  if (savedData) {
+    const gameData = JSON.parse(savedData);
+    score = gameData.score;
+    clickMultiplier = gameData.clickMultiplier;
+    upgrades = gameData.upgrades;
+    document.getElementById("score").innerText = score;
+
+    const upgradeElements = document.querySelectorAll(".upgrade");
+    upgradeElements.forEach((element, index) => {
+      const upgrade = upgrades[index];
       const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
+      const quantityElement = element.querySelector(".quantity");
+      const costElement = element.querySelector(".cost");
+      quantityElement.textContent = `Quantity: ${upgrade.quantity}`;
+      costElement.textContent = `Cost: ${totalCost} clicks`;
+    });
+  }
+}
 
-      if (score >= totalCost) {
-        score -= totalCost;
-        clickMultiplier *= upgrade.multiplier;
-        upgrade.quantity++;
-
-        // Save the upgrades data to local storage
-        saveData();
-
-        // Update the upgrade element with new values
-        const upgradeElement = document.getElementById(`upgrade-${index}`);
-        const upgradeButton = upgradeElement.querySelector("button");
-        const upgradeQuantity = upgradeElement.querySelector(".quantity");
-        const upgradeCost = upgradeElement.querySelector(".cost");
-
-        upgradeQuantity.textContent = `Quantity: ${upgrade.quantity}`;
-        upgradeCost.textContent = `Cost: ${totalCost} clicks`;
-
-        document.getElementById("score").innerText = score;
-        upgradeButton.disabled = score < upgrade.baseCost;
-      }
-    }
-
-    function toggleDarkMode() {
-      const body = document.body;
-      body.classList.toggle("dark-mode");
-    }
-
-    function initializeUpgrades() {
-      const upgradesContainer = document.getElementById("upgrades");
-      upgrades.forEach((upgrade, index) => {
-        const upgradeElement = document.createElement("li");
-        upgradeElement.classList.add("upgrade");
-        upgradeElement.id = `upgrade-${index}`;
-
-        const totalCost = upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.quantity);
-        const upgradeQuantity = document.createElement("span");
-        upgradeQuantity.classList.add("quantity");
-        upgradeQuantity.textContent = `Quantity: ${upgrade.quantity}`;
-
-        const upgradeCost = document.createElement("span");
-        upgradeCost.classList.add("cost");
-        upgradeCost.textContent = `Cost: ${totalCost} clicks`;
-
-        const upgradeButton = document.createElement("button");
-        upgradeButton.innerText = "Buy";
-        upgradeButton.addEventListener("click", () => {
-          buyUpgrade(index);
-        });
-
-        upgradeElement.innerText = `${upgrade.name} `;
-        upgradeElement.appendChild(upgradeQuantity);
-        upgradeElement.appendChild(document.createElement("br"));
-        upgradeElement.appendChild(upgradeCost);
-        upgradeElement.appendChild(document.createElement("br"));
-        upgradeElement.appendChild(upgradeButton);
-        upgradesContainer.appendChild(upgradeElement);
-      });
-    }
-
-    function saveData() {
-      const data = {
-        score: score,
-        upgrades: upgrades
-      };
-
-      localStorage.setItem("clickerGameData", JSON.stringify(data));
-    }
-
-    function loadData() {
-      const data = localStorage.getItem("clickerGameData");
-      if (data) {
-        const parsedData = JSON.parse(data);
-        score = parsedData.score;
-        upgrades = parsedData.upgrades;
-      }
-    }
-
-    function resetData() {
-      score = 0;
-      clickMultiplier = 1;
-      upgrades.forEach(upgrade => {
-        upgrade.quantity = 0;
-      });
-
-      saveData();
-      location.reload();
-    }
-
-    window.onload = function() {
-      loadData(); // Load saved data
-      initializeUpgrades(); // Initialize upgrades UI
-
-      // Update the score display
-      document.getElementById("score").innerText = score;
-
-      // Check if the purchased upgrade is the autoclicker
-      const autoclickerUpgrade = upgrades.find(upgrade => upgrade.autoclick && upgrade.quantity > 0);
-      if (autoclickerUpgrade) {
-        startAutoclicker();
-      }
-    };
-  </script>
-</head>
-<body class="dark-mode">
-  <div class="container">
-    <h1>Clicker Game</h1>
-    <p>Score: <span id="score">0</span></p>
-    <button id="click-button" onclick="increaseScore()">Click Me</button>
-    <ul id="upgrades"></ul>
-    <button id="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-    <button id="reset-button" onclick="resetData()">Reset</button>
-  </div>
+window.onload = function () {
+  loadGame();
+  initializeUpgrades();
+  document.getElementById("click-button").addEventListener("click", increaseScore);
+  document.getElementById("dark-mode-toggle").addEventListener("click", toggleDarkMode);
+  document.getElementById("reset-button").addEventListener("click", resetData);
+};
+</script>
 </body>
 </html>
